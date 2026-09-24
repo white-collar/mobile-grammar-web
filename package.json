@@ -1,0 +1,13 @@
+{
+  "name": "mobile-grammar-web",
+  "private": true,
+  "type": "module",
+  "description": "Static web version of the Mobile Grammar Android app",
+  "scripts": {
+    "start": "node tools/serve.mjs 8080",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.56.1"
+  }
+}

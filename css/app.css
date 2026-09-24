@@ -1,0 +1,328 @@
+/* Colours of the Android app (res/values/colors.xml). Lessons have fixed text colours
+   (navy, red, green), so the site keeps the app's light theme. */
+:root {
+  --primary: #3F51B5;
+  --primary-dark: #303F9F;
+  --fab: #476D7E;
+  --accent: #FF4081;
+  --text: #212121;
+  --text-secondary: #616161;
+  --divider: #E0E0E0;
+  --surface: #FFFFFF;
+  --background: #FAFAFA;
+  --error: #C62828;
+  --appbar-height: 56px;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--text);
+  font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow-wrap: break-word;
+}
+
+button, input, select { font: inherit; color: inherit; }
+
+[hidden] { display: none !important; }
+
+svg { width: 24px; height: 24px; fill: currentColor; }
+
+/* App bar */
+.appbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-height: var(--appbar-height);
+  padding: env(safe-area-inset-top) max(4px, env(safe-area-inset-right)) 0 max(4px, env(safe-area-inset-left));
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, .25);
+}
+
+.appbar-title {
+  flex: 1;
+  min-width: 0;
+  margin: 0 8px;
+  font-size: 1.2rem;
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.appbar-actions { display: flex; }
+
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  flex: none;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.icon-button:hover { background: rgba(255, 255, 255, .12); }
+.icon-button:focus-visible, .row:focus-visible, .button:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+.search {
+  flex: 1;
+  min-width: 0;
+  height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, .95);
+  color: var(--text);
+}
+
+.appbar.searching .appbar-title { display: none; }
+
+/* Navigation drawer */
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  background: rgba(0, 0, 0, .4);
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 21;
+  width: min(300px, 85vw);
+  overflow-y: auto;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: var(--surface);
+  box-shadow: 2px 0 8px rgba(0, 0, 0, .3);
+}
+
+.drawer-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(16px + env(safe-area-inset-top)) 16px 16px;
+  background: var(--primary-dark);
+  color: #fff;
+  font-weight: 500;
+}
+
+.drawer-header img { border-radius: 8px; background: #fff; }
+
+.drawer-list { margin: 8px 0; padding: 0; list-style: none; }
+
+.drawer-subheader {
+  padding: 12px 16px 4px;
+  color: var(--text-secondary);
+  font-size: .875rem;
+  font-weight: 500;
+}
+
+.drawer-divider { margin: 8px 0; border-top: 1px solid var(--divider); }
+
+.drawer-list a {
+  display: block;
+  padding: 12px 16px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.drawer-list a:hover { background: #F5F5F5; }
+.drawer-list a[aria-current="page"] { color: var(--primary); font-weight: 500; background: #E8EAF6; }
+
+.drawer-language {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px;
+  border-top: 1px solid var(--divider);
+  color: var(--text-secondary);
+}
+
+.drawer-language select { padding: 6px; border: 1px solid var(--divider); border-radius: 4px; background: var(--surface); }
+
+/* Content */
+main {
+  max-width: 800px;
+  margin: 0 auto;
+  padding-bottom: calc(88px + env(safe-area-inset-bottom));
+  outline: none;
+}
+
+.list { margin: 0; padding: 0; list-style: none; background: var(--surface); }
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--divider);
+  color: var(--text);
+  text-decoration: none;
+}
+
+a.row:hover { background: #F5F5F5; }
+
+.row-text { flex: 1; min-width: 0; }
+.row-secondary { display: block; color: var(--text-secondary); font-size: .875rem; }
+.row .icon-button { color: var(--text-secondary); }
+.row .icon-button:hover { background: rgba(0, 0, 0, .06); }
+
+.row-icon { flex: none; color: var(--primary); }
+
+.group-item { display: flex; align-items: center; padding-right: 8px; border-bottom: 1px solid var(--divider); }
+.group-item .row { flex: 1; min-width: 0; border-bottom: 0; }
+.group-item .icon-button { color: var(--text-secondary); }
+.group-item .icon-button:hover { background: rgba(0, 0, 0, .06); }
+
+.empty, .hint { margin: 0; padding: 24px 16px; color: var(--text-secondary); }
+.hint { padding-bottom: 8px; }
+
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 8px 16px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--fab);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.button-row { padding: 0 16px 16px; }
+
+/* Lesson */
+.lesson {
+  padding: 16px max(16px, env(safe-area-inset-right)) 16px max(16px, env(safe-area-inset-left));
+  background: var(--surface);
+  overflow-x: auto;
+}
+
+.lesson table { max-width: 100%; }
+/* words break only when a table column can't fit otherwise */
+.lesson td { overflow-wrap: anywhere; }
+.lesson p { margin: .5em 0; }
+.lesson .UNIT { display: none; } /* repeats the title bar above it */
+.lesson .TITLE { font-size: 1.4em; font-weight: bold; }
+
+.about { padding: 8px 16px 16px; background: var(--surface); }
+.about a { color: var(--primary); }
+.web-note { margin: 0; padding: 16px; background: #E8EAF6; }
+
+/* Group form */
+.form { background: var(--surface); }
+.field { display: block; padding: 16px 16px 0; }
+.field input {
+  width: 100%;
+  margin-top: 4px;
+  padding: 10px 12px;
+  border: 1px solid #BDBDBD;
+  border-radius: 4px;
+  background: var(--surface);
+}
+.field input:focus { border-color: var(--primary); outline: 1px solid var(--primary); }
+.field.filter { padding-top: 0; padding-bottom: 12px; }
+.error { margin: 4px 16px 0; color: var(--error); font-size: .875rem; }
+.check-row { cursor: pointer; }
+.check-row input { width: 20px; height: 20px; flex: none; accent-color: var(--fab); }
+
+.form-footer {
+  position: sticky;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--divider);
+  background: var(--surface);
+}
+
+.form-footer .count { color: var(--text-secondary); }
+
+/* Floating button, snackbar, dialog */
+.fab {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 0;
+  border-radius: 50%;
+  background: var(--fab);
+  color: #fff;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .3);
+  cursor: pointer;
+  transition: transform .2s;
+}
+
+.fab.away { transform: translateY(calc(100% + 32px)); }
+
+.snackbar {
+  position: fixed;
+  left: 50%;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 30;
+  max-width: calc(100% - 32px);
+  padding: 14px 16px;
+  border-radius: 4px;
+  background: #323232;
+  color: #fff;
+  transform: translateX(-50%);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, .3);
+}
+
+.dialog {
+  width: min(400px, calc(100% - 32px));
+  padding: 24px 24px 8px;
+  border: 0;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .3);
+}
+
+.dialog::backdrop { background: rgba(0, 0, 0, .4); }
+.dialog h2 { margin: 0 0 8px; font-size: 1.2rem; font-weight: 500; }
+.dialog p { margin: 0 0 16px; color: var(--text-secondary); }
+.dialog-buttons { display: flex; justify-content: flex-end; gap: 8px; }
+.dialog-buttons button {
+  min-height: 40px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 4px;
+  background: none;
+  color: var(--primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+.dialog-buttons button:hover { background: #E8EAF6; }
+
+@media (min-width: 800px) {
+  main { padding-top: 16px; }
+  .list, .lesson, .form, .about { border-radius: 4px; box-shadow: 0 1px 3px rgba(0, 0, 0, .15); }
+}

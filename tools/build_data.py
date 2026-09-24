@@ -1,0 +1,95 @@
+#!/usr/bin/env python3
+"""Converts lessons of the Android app (white-collar/mobile-grammar) into static files.
+
+Usage: python3 tools/build_data.py <path to mobile-grammar checkout>
+
+Writes data/lessons.json, data/chapters.json, data/lessons/<id>.html and data/about/<lang>.html
+(English About text comes from tools/about_en.html).
+"""
+import json
+import re
+import sqlite3
+import sys
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parent.parent
+DATA = ROOT / "data"
+
+
+def clean_lesson(html):
+    """Keeps only lesson content: no head/meta, scripts, handlers, links or converter leftovers."""
+    body = re.search(r"<body[^>]*>(.*)</body>", html, re.S | re.I)
+    html = body.group(1) if body else html
+    html = re.sub(r"<!-- CHM2WEB -->.*?<!-- /CHM2WEB -->", "", html, flags=re.S)
+    html = re.sub(r"<!--.*?-->", "", html, flags=re.S)
+    html = re.sub(r"<head>.*?</head>", "", html, flags=re.S | re.I)
+    html = re.sub(r"<(meta|title)[^>]*>(.*?</title>)?", "", html, flags=re.S | re.I)
+    html = re.sub(r"<script.*?</script>", "", html, flags=re.S | re.I)
+    html = re.sub(r"\son\w+\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s>]+)", "", html, flags=re.I)
+    # links were disabled in the app, keep only their text
+    html = re.sub(r"<a\b[^>]*>", "<span>", html, flags=re.I)
+    html = re.sub(r"</a>", "</span>", html, flags=re.I)
+    # fixed pixel widths of tables (up to 506px) are wider than phones and stop text from wrapping;
+    # percentage widths stay
+    html = re.sub(r'\s(width|height)="\d+"', "", html, flags=re.I)
+    html = re.sub(r'\sbgcolor="#BACKCOLOR#"', "", html)
+    # word lists like "nice/kind/good/..." have no spaces: allow line breaks after slashes (text only, not tags)
+    html = "".join(part if part.startswith("<") else part.replace("/", "/<wbr>")
+                   for part in re.split(r"(<[^>]+>)", html))
+    # fixed point sizes -> relative, so text follows the page's font size (10pt = 1em);
+    # right margins only waste width on phones
+    html = re.sub(r"margin-right:\s*[\d.]+pt;?\s*", "", html)
+    html = re.sub(r"(font-size|margin-left):\s*([\d.]+)pt",
+                  lambda m: "%s:%sem" % (m.group(1), round(float(m.group(2)) / 10, 2)), html)
+    return html.strip() + "\n"
+
+
+def clean_about(html):
+    body = re.search(r"<body[^>]*>(.*)</body>", html, re.S | re.I)
+    html = body.group(1) if body else html
+    # 3rd section "What's new" describes Android features (reminders via calendar, usage statistics)
+    sections = re.split(r"(?=<h4)", html, flags=re.I)
+    if len(sections) == 5:
+        del sections[3]
+    html = "".join(sections)
+    html = re.sub(r"<script.*?</script>", "", html, flags=re.S | re.I)
+    html = re.sub(r"\son\w+\s*=\s*(\"[^\"]*\"|'[^']*'|[^\s>]+)", "", html, flags=re.I)
+    # external links open in a new tab
+    html = re.sub(r"<a\s+href=", '<a target="_blank" rel="noopener" href=', html, flags=re.I)
+    return html.strip() + "\n"
+
+
+def main():
+    if len(sys.argv) != 2:
+        sys.exit(__doc__)
+    source = Path(sys.argv[1])
+    assets = source / "app/src/main/assets"
+    db = sqlite3.connect(str(assets / "db11.db"))
+
+    (DATA / "lessons").mkdir(parents=True, exist_ok=True)
+    lessons = []
+    for lesson_id, title, html in db.execute("select _id, unit_number, html from articles order by _id"):
+        lessons.append({"id": lesson_id, "title": title.strip()})
+        (DATA / "lessons" / ("%d.html" % lesson_id)).write_text(clean_lesson(html), encoding="utf-8")
+
+    # groups with _id 1..4 are the built-in chapters, ids are "1,\n2,\n..."
+    chapters = []
+    for group_id, ids in db.execute("select _id, ids from groups_lesson where _id <= 4 order by _id"):
+        chapters.append({"id": group_id, "lessons": [int(i) for i in re.findall(r"\d+", ids)]})
+
+    (DATA / "lessons.json").write_text(json.dumps(lessons, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
+    (DATA / "chapters.json").write_text(json.dumps(chapters, indent=1) + "\n", encoding="utf-8")
+
+    (DATA / "about").mkdir(exist_ok=True)
+    for lang, name in (("ru", "about_ru.html"), ("uk", "about_ua.html")):
+        html = (assets / "about" / name).read_text(encoding="utf-8")
+        (DATA / "about" / ("%s.html" % lang)).write_text(clean_about(html), encoding="utf-8")
+    # about_en.html of the app is empty, English text is kept in this repo
+    html = (ROOT / "tools" / "about_en.html").read_text(encoding="utf-8")
+    (DATA / "about" / "en.html").write_text(clean_about(html), encoding="utf-8")
+
+    print("%d lessons, %d chapters" % (len(lessons), len(chapters)))
+
+
+if __name__ == "__main__":
+    main()
