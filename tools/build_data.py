@@ -6,6 +6,7 @@ Usage: python3 tools/build_data.py <path to mobile-grammar checkout>
 Writes data/lessons.json, data/chapters.json, data/lessons/<id>.html and data/about/<lang>.html
 (English About text comes from tools/about_en.html).
 """
+import html as htmlentities
 import json
 import re
 import sqlite3
@@ -14,6 +15,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
+
+# wrong titles in the app's database
+TITLE_FIXES = {
+    106: "Unit 106 - Word order (2) - adverbs with the verb",
+}
 
 
 def clean_lesson(html):
@@ -69,7 +75,8 @@ def main():
     (DATA / "lessons").mkdir(parents=True, exist_ok=True)
     lessons = []
     for lesson_id, title, html in db.execute("select _id, unit_number, html from articles order by _id"):
-        lessons.append({"id": lesson_id, "title": title.strip()})
+        title = TITLE_FIXES.get(lesson_id, htmlentities.unescape(title).strip())
+        lessons.append({"id": lesson_id, "title": title})
         (DATA / "lessons" / ("%d.html" % lesson_id)).write_text(clean_lesson(html), encoding="utf-8")
 
     # groups with _id 1..4 are the built-in chapters, ids are "1,\n2,\n..."

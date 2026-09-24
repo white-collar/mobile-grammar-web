@@ -1,6 +1,6 @@
 // Offline support: caches the site and all lessons on the first visit (the Android app worked offline too).
 // Bump VERSION when files change, so browsers replace the old cache.
-const VERSION = 'v1';
+const VERSION = 'v2';
 const CACHE = `mobile-grammar-${VERSION}`;
 
 const SHELL = [
@@ -16,6 +16,7 @@ const SHELL = [
   'icons/icon-512.png',
   'data/lessons.json',
   'data/chapters.json',
+  'data/categories.json',
   'data/about/en.html',
   'data/about/ru.html',
   'data/about/uk.html',

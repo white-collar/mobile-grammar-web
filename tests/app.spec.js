@@ -221,3 +221,64 @@ test('works offline after the first visit', async ({ page, context }) => {
   await expect(page.locator('.lesson table').first()).toBeVisible();
   await expect(page.locator('#title')).toContainText('Unit 77');
 });
+
+test.describe('categories', () => {
+  const readJson = name => JSON.parse(readFileSync(new URL(`../data/${name}`, import.meta.url), 'utf8'));
+
+  test('every category puts each lesson in exactly one group', () => {
+    const ids = readJson('lessons.json').map(l => l.id).sort((a, b) => a - b);
+    for (const category of readJson('categories.json')) {
+      const inGroups = category.groups.flatMap(g => g.lessons).sort((a, b) => a - b);
+      expect(inGroups, category.id).toEqual(ids);
+      for (const group of category.groups) expect(Object.keys(group.name).sort()).toEqual(['en', 'ru', 'uk']);
+    }
+  });
+
+  test('lesson titles are plain text', () => {
+    for (const lesson of readJson('lessons.json')) expect(lesson.title, String(lesson.id)).not.toMatch(/&[a-z#0-9]+;/i);
+  });
+
+  test('lessons by level from the menu', async ({ page }) => {
+    await page.goto('./');
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await page.getByRole('link', { name: 'By level' }).click();
+    await expect(page.locator('#title')).toHaveText('By level');
+    await expect(page.locator('.section-header')).toHaveText([
+      'A1 · Beginner9', 'A2 · Elementary26', 'B1 · Intermediate53', 'B2 · Upper-intermediate36', 'Higher · C1–C26']);
+    await expect(rows(page)).toHaveCount(130);
+    await expect(page.locator('.chip')).toHaveText(['A1', 'A2', 'B1', 'B2', 'Higher']);
+  });
+
+  test('level buttons jump to the level without hiding its first lesson', async ({ page }) => {
+    await page.goto('./#/category/level');
+    await page.locator('.chip', { hasText: 'B2' }).click();
+    const b2 = page.locator('section', { has: page.locator('#section-B2') });
+    await expect(b2.locator('.row').first()).toBeInViewport();
+    await expect.poll(async () => {
+      const header = await page.locator('#section-B2').boundingBox();
+      const first = await b2.locator('.row').first().boundingBox();
+      return first.y >= header.y + header.height - 1;
+    }).toBe(true);
+  });
+
+  test('search filters inside the levels', async ({ page }) => {
+    await page.goto('./#/category/level');
+    await page.getByRole('button', { name: 'Search' }).click();
+    await page.locator('#search').fill('passive');
+    await expect(rows(page)).toHaveCount(3);
+    await expect(page.locator('.section-header:visible')).toHaveText(['B1 · Intermediate2', 'B2 · Upper-intermediate1']);
+    await expect(page.locator('.chips')).toBeHidden();
+    await page.locator('#search').fill('zzz');
+    await expect(page.getByText('Oops! No such lessons.')).toBeVisible();
+  });
+
+  test('level names follow the language', async ({ page }) => {
+    await page.goto('./');
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await page.getByLabel('Language').selectOption('ru');
+    await page.getByRole('button', { name: 'Меню' }).click();
+    await page.getByRole('link', { name: 'По уровню' }).click();
+    await expect(page.locator('.section-header').first()).toContainText('A1 · Начальный');
+    await expect(page.locator('.chip').last()).toHaveText('Высший');
+  });
+});

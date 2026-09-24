@@ -188,6 +188,49 @@ a.row:hover { background: #F5F5F5; }
 
 .row-icon { flex: none; color: var(--primary); }
 
+/* Category page: level buttons and sections */
+.chips {
+  display: flex;
+  gap: 8px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  background: var(--surface);
+  border-bottom: 1px solid var(--divider);
+}
+
+.chip {
+  flex: none;
+  min-width: 48px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--primary);
+  border-radius: 18px;
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.chip:hover { background: #E8EAF6; }
+
+.section-header {
+  position: sticky;
+  top: calc(var(--appbar-height) + env(safe-area-inset-top));
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0;
+  padding: 10px 16px;
+  background: #E8EAF6;
+  color: var(--primary-dark);
+  font-size: 1rem;
+  font-weight: 500;
+  scroll-margin-top: calc(var(--appbar-height) + env(safe-area-inset-top));
+}
+
+.section-count { color: var(--text-secondary); font-size: .875rem; font-weight: 400; }
+
 .group-item { display: flex; align-items: center; padding-right: 8px; border-bottom: 1px solid var(--divider); }
 .group-item .row { flex: 1; min-width: 0; border-bottom: 0; }
 .group-item .icon-button { color: var(--text-secondary); }

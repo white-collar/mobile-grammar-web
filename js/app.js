@@ -32,6 +32,8 @@ const dialog = $('dialog');
 let lessons = [];
 const lessonById = new Map();
 let chapters = [];
+// ways to sort lessons into groups (by level, later by topic etc.), see data/categories.json
+let categories = [];
 const htmlCache = new Map();
 
 let route = { name: 'all' };
@@ -143,6 +145,8 @@ function renderDrawer() {
     item('#/', t('allLessons')),
     el('li', { class: 'drawer-subheader' }, t('chapters')),
     ...chapters.map(c => item(`#/chapter/${c.id}`, t('chapter', c.id))),
+    el('li', { class: 'drawer-subheader' }, t('categories')),
+    ...categories.map(c => item(`#/category/${c.id}`, localized(c.name))),
     el('li', { class: 'drawer-divider', role: 'separator' }),
     item('#/groups', t('yourGroups')),
     item('#/about', t('about')),
@@ -222,6 +226,49 @@ function lessonList(lessonIds) {
 function viewAll() {
   setAppbar({ title: t('allLessons'), search: t('searchLessons') });
   main.replaceChildren(...lessonList(lessons.map(l => l.id)));
+}
+
+/** Text of data files, given as {en, ru, uk} */
+function localized(names) {
+  return names[language()] || names.en;
+}
+
+/** All lessons in sections of the category, with buttons to jump to a section and search over all */
+function viewCategory(id) {
+  const category = categories.find(c => c.id === id);
+  if (!category) return viewAll();
+  setAppbar({ title: localized(category.name), search: t('searchLessons') });
+  const sections = category.groups.map(group => {
+    const lessonsOfGroup = group.lessons.map(lessonId => lessonById.get(lessonId)).filter(Boolean);
+    const list = el('ul', { class: 'list' });
+    const count = el('span', { class: 'section-count' });
+    const header = el('h2', { class: 'section-header', id: `section-${group.id}` }, localized(group.name), count);
+    return { group, lessons: lessonsOfGroup, list, count, header, node: el('section', {}, header, list) };
+  });
+  const jump = el('nav', { class: 'chips', 'aria-label': localized(category.name) }, sections.map(section =>
+    el('button', {
+      class: 'chip', type: 'button',
+      // the header has scroll-margin for the app bar, so the first lesson isn't hidden under it
+      onclick: () => section.header.scrollIntoView({ behavior: 'smooth' }),
+    }, localized(section.group.name).split(' · ')[0])));
+  const empty = el('p', { class: 'empty', hidden: true }, t('nothingFound'));
+  const show = query => {
+    const words = query.toLowerCase().split(/\s+/).filter(Boolean);
+    let total = 0;
+    for (const section of sections) {
+      const found = section.lessons.filter(l => words.every(w => l.title.toLowerCase().includes(w)));
+      section.list.replaceChildren(...found.map(lessonRow));
+      section.count.textContent = String(found.length);
+      section.node.hidden = found.length === 0;
+      total += found.length;
+    }
+    jump.hidden = words.length > 0;
+    empty.hidden = total > 0;
+    updateFab();
+  };
+  main.replaceChildren(jump, ...sections.map(s => s.node), empty);
+  show('');
+  applySearch = show;
 }
 
 function viewChapter(id) {
@@ -423,6 +470,7 @@ function parseRoute() {
   if (name === 'group' && id && action === 'edit') return { name: 'groupForm', id };
   if (name === 'group' && id) return { name: 'group', id };
   if (name === 'about') return { name: 'about' };
+  if (name === 'category' && id) return { name: 'category', id };
   return { name: 'all' };
 }
 
@@ -439,6 +487,7 @@ function render() {
     case 'group': viewGroup(route.id); break;
     case 'groupForm': viewGroupForm(route.id); break;
     case 'about': viewAbout(); break;
+    case 'category': viewCategory(route.id); break;
     default: viewAll();
   }
   updateFab();
@@ -502,7 +551,8 @@ async function start() {
   setLanguage(store.loadLanguage() || browserLanguage());
   fab.setAttribute('aria-label', t('scrollTop'));
   try {
-    [lessons, chapters] = await Promise.all([fetchJson('data/lessons.json'), fetchJson('data/chapters.json')]);
+    [lessons, chapters, categories] = await Promise.all(
+      ['data/lessons.json', 'data/chapters.json', 'data/categories.json'].map(fetchJson));
   } catch (e) {
     titleEl.textContent = t('appName');
     main.replaceChildren(

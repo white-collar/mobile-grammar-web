@@ -12,6 +12,8 @@ Same as the Android app:
 
 - **All lessons** with search by title
 - **Chapters**: the four built-in groups of lessons
+- **Categories** *(new on the web)*: all lessons sorted into groups. The first category is **by level**:
+  A1, A2, B1, B2 and Higher (C1–C2), with buttons to jump to a level and search across all of them.
 - **Your groups**: create, edit and remove your own lists of lessons. They are saved in the browser
   (`localStorage`), so they stay on that device and browser only.
 - **Reminders**: "Setup reminder" on a lesson or group downloads a calendar event (`.ics`) for the next
@@ -43,8 +45,8 @@ npx playwright install chromium   # once
 npm test
 ```
 
-The tests open the site at phone sizes and cover lists, search, lessons, groups, reminders, languages,
-layout width and offline mode.
+The tests open the site at phone sizes and cover lists, search, lessons, categories, groups, reminders,
+languages, layout width and offline mode.
 
 ## Publish with GitHub Pages
 
@@ -65,6 +67,31 @@ python3 tools/build_data.py mobile-grammar
 The script removes leftovers of the old help-file converter, scripts and links (the app disabled links),
 turns fixed sizes into relative ones and removes fixed table widths, so lessons fit phone screens.
 The English About text is kept in `tools/about_en.html`, because the app's English About page is empty.
+The script also decodes HTML codes in titles and fixes the wrong title of unit 106 in the app's database.
+
+### Categories
+
+`data/categories.json` is edited by hand. Each category has a localized name and groups, and every lesson
+must be in exactly one group of each category (the tests check this):
+
+```json
+[
+  {
+    "id": "level",
+    "name": { "en": "By level", "ru": "По уровню", "uk": "За рівнем" },
+    "groups": [
+      { "id": "A1", "name": { "en": "A1 · Beginner", "ru": "A1 · Начальный", "uk": "A1 · Початковий" }, "lessons": [1, 2, 24] }
+    ]
+  }
+]
+```
+
+To add a category (for example by topic), add an entry to the list: it appears in the menu under
+"Categories", no code changes needed. To move a lesson to another level, move its number to another group.
+
+Levels were assigned by the grammar each unit teaches, following common CEFR grammar inventories
+(British Council/EAQUALS Core Inventory, English Profile). Levels of a grammar point differ between
+sources, so treat them as a starting point.
 
 ## License
 
