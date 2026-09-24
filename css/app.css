@@ -213,6 +213,18 @@ a.row:hover { background: #F5F5F5; }
 
 .chip:hover { background: #E8EAF6; }
 
+.jump-select {
+  flex: 1;
+  min-width: 0;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--primary);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--primary);
+  font-weight: 500;
+}
+
 .section-header {
   position: sticky;
   top: calc(var(--appbar-height) + env(safe-area-inset-top));

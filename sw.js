@@ -1,6 +1,6 @@
 // Offline support: caches the site and all lessons on the first visit (the Android app worked offline too).
 // Bump VERSION when files change, so browsers replace the old cache.
-const VERSION = 'v3';
+const VERSION = 'v4';
 const CACHE = `mobile-grammar-${VERSION}`;
 
 const SHELL = [

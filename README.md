@@ -11,8 +11,10 @@ Plain HTML, CSS and JavaScript: no framework and no build step to run the site.
 Same as the Android app:
 
 - **All lessons** with search by title
-- **Categories** *(new on the web)*: all lessons sorted into groups. The first category is **by level**:
-  A1, A2, B1, B2 and Higher (C1–C2), with buttons to jump to a level and search across all of them.
+- **Categories** *(new on the web)*: all lessons sorted into groups, with search across all of them.
+  - **By level**: A1, A2, B1, B2 and Higher (C1–C2), with buttons to jump to a level
+  - **By topic**: 16 topics (tenses, modal verbs, passive, articles, prepositions etc.), chosen from a
+    "Go to" list, since there are too many for buttons (more than 6 groups)
 - **Your groups**: create, edit and remove your own lists of lessons. They are saved in the browser
   (`localStorage`), so they stay on that device and browser only.
 - **Reminders**: "Setup reminder" on a lesson or group downloads a calendar event (`.ics`) for the next
@@ -86,7 +88,7 @@ must be in exactly one group of each category (the tests check this):
 ]
 ```
 
-To add a category (for example by topic), add an entry to the list: it appears in the menu under
+To add a category, add an entry to the list: it appears in the menu under
 "Categories", no code changes needed. To move a lesson to another level, move its number to another group.
 
 Levels were assigned by the grammar each unit teaches, following common CEFR grammar inventories

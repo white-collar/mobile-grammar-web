@@ -225,6 +225,8 @@ function viewAll() {
   main.replaceChildren(...lessonList(lessons.map(l => l.id)));
 }
 
+const MAX_JUMP_BUTTONS = 6;
+
 /** Text of data files, given as {en, ru, uk} */
 function localized(names) {
   return names[language()] || names.en;
@@ -242,12 +244,23 @@ function viewCategory(id) {
     const header = el('h2', { class: 'section-header', id: `section-${group.id}` }, localized(group.name), count);
     return { group, lessons: lessonsOfGroup, list, count, header, node: el('section', {}, header, list) };
   });
-  const jump = el('nav', { class: 'chips', 'aria-label': localized(category.name) }, sections.map(section =>
-    el('button', {
-      class: 'chip', type: 'button',
-      // the header has scroll-margin for the app bar, so the first lesson isn't hidden under it
-      onclick: () => section.header.scrollIntoView({ behavior: 'smooth' }),
-    }, localized(section.group.name).split(' · ')[0])));
+  // the header has scroll-margin for the app bar, so the first lesson isn't hidden under it
+  const scrollTo = section => section.header.scrollIntoView({ behavior: 'smooth' });
+  // a few groups fit as buttons, many (e.g. topics) are chosen from a list
+  const jump = sections.length <= MAX_JUMP_BUTTONS
+    ? el('nav', { class: 'chips', 'aria-label': localized(category.name) }, sections.map(section =>
+      el('button', { class: 'chip', type: 'button', onclick: () => scrollTo(section) },
+        localized(section.group.name).split(' · ')[0])))
+    : el('div', { class: 'chips' }, el('select', {
+      class: 'jump-select',
+      'aria-label': t('goTo'),
+      onchange: e => {
+        scrollTo(sections[Number(e.target.value)]);
+        e.target.selectedIndex = 0;
+      },
+    }, el('option', { value: '', disabled: true, selected: true }, `${t('goTo')} …`),
+    sections.map((section, index) => el('option', { value: index },
+      `${localized(section.group.name)} (${section.lessons.length})`))));
   const empty = el('p', { class: 'empty', hidden: true }, t('nothingFound'));
   const show = query => {
     const words = query.toLowerCase().split(/\s+/).filter(Boolean);

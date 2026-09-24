@@ -27,7 +27,7 @@ test('search filters lessons by title', async ({ page }) => {
 test('menu has no built-in groups, old links to them open all lessons', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: 'Menu' }).click();
-  await expect(page.locator('#drawer-list a')).toHaveText(['All lessons', 'By level', 'Your groups', 'About program']);
+  await expect(page.locator('#drawer-list a')).toHaveText(['All lessons', 'By level', 'By topic', 'Your groups', 'About program']);
   await page.goto('./#/chapter/2');
   await expect(page.locator('#title')).toHaveText('All lessons');
   await expect(rows(page)).toHaveCount(130);
@@ -271,6 +271,22 @@ test.describe('categories', () => {
     await expect(page.getByText('Oops! No such lessons.')).toBeVisible();
   });
 
+  test('lessons by topic, chosen from a list', async ({ page }) => {
+    await page.goto('./');
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await page.getByRole('link', { name: 'By topic' }).click();
+    await expect(page.locator('#title')).toHaveText('By topic');
+    await expect(page.locator('.section-header')).toHaveCount(16);
+    await expect(rows(page)).toHaveCount(130);
+    // too many topics for buttons: a list instead
+    await expect(page.locator('.chip')).toHaveCount(0);
+    await page.getByLabel('Go to').selectOption({ label: 'Passive (5)' });
+    const passive = page.locator('section', { has: page.locator('#section-passive') });
+    await expect(passive.locator('.row').first()).toBeInViewport();
+    await expect(passive.locator('.row').first()).toContainText('Unit 42');
+    await expect(page.getByLabel('Go to')).toHaveValue('');
+  });
+
   test('level names follow the language', async ({ page }) => {
     await page.goto('./');
     await page.getByRole('button', { name: 'Menu' }).click();
@@ -279,5 +295,8 @@ test.describe('categories', () => {
     await page.getByRole('link', { name: 'По уровню' }).click();
     await expect(page.locator('.section-header').first()).toContainText('A1 · Начальный');
     await expect(page.locator('.chip').last()).toHaveText('Высший');
+    await page.getByRole('button', { name: 'Меню' }).click();
+    await page.getByRole('link', { name: 'По теме' }).click();
+    await expect(page.locator('.section-header').first()).toContainText('Настоящее время');
   });
 });
