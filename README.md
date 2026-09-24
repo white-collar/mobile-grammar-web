@@ -11,7 +11,6 @@ Plain HTML, CSS and JavaScript: no framework and no build step to run the site.
 Same as the Android app:
 
 - **All lessons** with search by title
-- **Chapters**: the four built-in groups of lessons
 - **Categories** *(new on the web)*: all lessons sorted into groups. The first category is **by level**:
   A1, A2, B1, B2 and Higher (C1–C2), with buttons to jump to a level and search across all of them.
 - **Your groups**: create, edit and remove your own lists of lessons. They are saved in the browser
@@ -27,7 +26,8 @@ Also:
 - **Installable** on the home screen (`manifest.webmanifest`).
 - No tracking or statistics.
 
-The "Irregular verbs" section of the app isn't here: it was never finished in the app either.
+Not included: the app's four built-in groups ("Group 1–4"), replaced by the categories, and the
+"Irregular verbs" section, which was never finished in the app either.
 
 ## Run locally
 

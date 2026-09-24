@@ -24,14 +24,13 @@ test('search filters lessons by title', async ({ page }) => {
   await expect(rows(page)).toHaveCount(130);
 });
 
-test('chapters from the menu show their lessons', async ({ page }) => {
+test('menu has no built-in groups, old links to them open all lessons', async ({ page }) => {
   await page.goto('./');
   await page.getByRole('button', { name: 'Menu' }).click();
-  await page.getByRole('link', { name: 'Group 4' }).click();
-  await expect(page.locator('#title')).toHaveText('Group 4');
-  await expect(rows(page)).toHaveCount(40);
-  await expect(rows(page).first()).toContainText('Unit 91');
-  await expect(page.locator('#drawer')).toBeHidden();
+  await expect(page.locator('#drawer-list a')).toHaveText(['All lessons', 'By level', 'Your groups', 'About program']);
+  await page.goto('./#/chapter/2');
+  await expect(page.locator('#title')).toHaveText('All lessons');
+  await expect(rows(page)).toHaveCount(130);
 });
 
 test('opens a lesson and goes back to the list', async ({ page }) => {
@@ -176,7 +175,7 @@ test.describe('languages', () => {
     await page.reload();
     await expect(page.locator('#title')).toHaveText('Усі уроки');
     await page.getByRole('button', { name: 'Меню' }).click();
-    await expect(page.getByRole('link', { name: 'Добірка 1' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'Ваші добірки' })).toBeVisible();
   });
 });
 

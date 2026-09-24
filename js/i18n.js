@@ -3,9 +3,7 @@ const STRINGS = {
   en: {
     appName: 'Mobile Grammar',
     allLessons: 'All lessons',
-    chapters: 'Chapters',
     categories: 'Categories',
-    chapter: n => `Group ${n}`,
     yourGroups: 'Your groups',
     about: 'About program',
     searchLessons: 'Enter article name …',
@@ -52,9 +50,7 @@ const STRINGS = {
   ru: {
     appName: 'Мобильная грамматика',
     allLessons: 'Все уроки',
-    chapters: 'Подборки',
     categories: 'Категории',
-    chapter: n => `Подборка ${n}`,
     yourGroups: 'Ваши подборки',
     about: 'О программе',
     searchLessons: 'Какой урок найти ?',
@@ -101,9 +97,7 @@ const STRINGS = {
   uk: {
     appName: 'Мобільна граматика',
     allLessons: 'Усі уроки',
-    chapters: 'Добірки',
     categories: 'Категорії',
-    chapter: n => `Добірка ${n}`,
     yourGroups: 'Ваші добірки',
     about: 'Про програму',
     searchLessons: 'Який урок знайти ?',

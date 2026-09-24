@@ -3,7 +3,7 @@
 
 Usage: python3 tools/build_data.py <path to mobile-grammar checkout>
 
-Writes data/lessons.json, data/chapters.json, data/lessons/<id>.html and data/about/<lang>.html
+Writes data/lessons.json, data/lessons/<id>.html and data/about/<lang>.html
 (English About text comes from tools/about_en.html).
 """
 import html as htmlentities
@@ -79,13 +79,7 @@ def main():
         lessons.append({"id": lesson_id, "title": title})
         (DATA / "lessons" / ("%d.html" % lesson_id)).write_text(clean_lesson(html), encoding="utf-8")
 
-    # groups with _id 1..4 are the built-in chapters, ids are "1,\n2,\n..."
-    chapters = []
-    for group_id, ids in db.execute("select _id, ids from groups_lesson where _id <= 4 order by _id"):
-        chapters.append({"id": group_id, "lessons": [int(i) for i in re.findall(r"\d+", ids)]})
-
     (DATA / "lessons.json").write_text(json.dumps(lessons, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
-    (DATA / "chapters.json").write_text(json.dumps(chapters, indent=1) + "\n", encoding="utf-8")
 
     (DATA / "about").mkdir(exist_ok=True)
     for lang, name in (("ru", "about_ru.html"), ("uk", "about_ua.html")):
@@ -95,7 +89,7 @@ def main():
     html = (ROOT / "tools" / "about_en.html").read_text(encoding="utf-8")
     (DATA / "about" / "en.html").write_text(clean_about(html), encoding="utf-8")
 
-    print("%d lessons, %d chapters" % (len(lessons), len(chapters)))
+    print("%d lessons" % len(lessons))
 
 
 if __name__ == "__main__":

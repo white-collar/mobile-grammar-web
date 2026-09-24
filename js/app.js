@@ -31,7 +31,6 @@ const dialog = $('dialog');
 
 let lessons = [];
 const lessonById = new Map();
-let chapters = [];
 // ways to sort lessons into groups (by level, later by topic etc.), see data/categories.json
 let categories = [];
 const htmlCache = new Map();
@@ -143,8 +142,6 @@ function renderDrawer() {
   }, text));
   $('drawer-list').replaceChildren(
     item('#/', t('allLessons')),
-    el('li', { class: 'drawer-subheader' }, t('chapters')),
-    ...chapters.map(c => item(`#/chapter/${c.id}`, t('chapter', c.id))),
     el('li', { class: 'drawer-subheader' }, t('categories')),
     ...categories.map(c => item(`#/category/${c.id}`, localized(c.name))),
     el('li', { class: 'drawer-divider', role: 'separator' }),
@@ -269,13 +266,6 @@ function viewCategory(id) {
   main.replaceChildren(jump, ...sections.map(s => s.node), empty);
   show('');
   applySearch = show;
-}
-
-function viewChapter(id) {
-  const chapter = chapters.find(c => String(c.id) === id);
-  if (!chapter) return viewAll();
-  setAppbar({ title: t('chapter', chapter.id), search: t('searchLessons') });
-  main.replaceChildren(...lessonList(chapter.lessons));
 }
 
 async function viewLesson(id) {
@@ -463,7 +453,6 @@ async function viewAbout() {
 
 function parseRoute() {
   const [name, id, action] = location.hash.replace(/^#\/?/, '').split('/').map(decodeURIComponent);
-  if (name === 'chapter' && id) return { name: 'chapter', id };
   if (name === 'lesson' && id) return { name: 'lesson', id };
   if (name === 'groups') return { name: 'groups' };
   if (name === 'group' && id === 'new') return { name: 'groupForm' };
@@ -481,7 +470,6 @@ function render() {
   renderDrawer();
   route = parseRoute();
   switch (route.name) {
-    case 'chapter': viewChapter(route.id); break;
     case 'lesson': viewLesson(route.id); break;
     case 'groups': viewGroups(); break;
     case 'group': viewGroup(route.id); break;
@@ -551,8 +539,7 @@ async function start() {
   setLanguage(store.loadLanguage() || browserLanguage());
   fab.setAttribute('aria-label', t('scrollTop'));
   try {
-    [lessons, chapters, categories] = await Promise.all(
-      ['data/lessons.json', 'data/chapters.json', 'data/categories.json'].map(fetchJson));
+    [lessons, categories] = await Promise.all(['data/lessons.json', 'data/categories.json'].map(fetchJson));
   } catch (e) {
     titleEl.textContent = t('appName');
     main.replaceChildren(
