@@ -2,7 +2,7 @@
 
 A mobile-friendly static website version of the Android app
 [Mobile Grammar: English](https://github.com/white-collar/mobile-grammar):
-130 lessons of English grammar with explanations in Russian.
+130 lessons of English grammar with explanations in Ukrainian.
 
 Plain HTML, CSS and JavaScript: no framework and no build step to run the site.
 
@@ -19,15 +19,14 @@ Same as the Android app:
   (`localStorage`), so they stay on that device and browser only.
 - **Reminders**: "Setup reminder" on a lesson or group downloads a calendar event (`.ics`) for the next
   full hour, which the phone's calendar app imports. The Android app opened the calendar app directly.
-- **About** page, and the interface in English, Russian and Ukrainian (follows the browser language,
-  can be changed in the menu)
-- **Lessons in Ukrainian** *(new on the web)*: with the Ukrainian interface the explanations are shown in
-  Ukrainian, otherwise in Russian as in the app. English examples are the same in both.
+- **About** page, and the interface in English and Ukrainian (Ukrainian if the browser prefers it, otherwise
+  English; can be changed in the menu)
+- **Explanations in Ukrainian** *(new on the web)*: the app's lessons explain grammar in Russian; here they are
+  translated into Ukrainian, with the same English examples and layout
 
 Also:
 
-- **Works offline** after the first visit: a service worker (`sw.js`) caches the site and all lessons in the
-  current language (about 2.5 MB); switching language downloads the other set.
+- **Works offline** after the first visit: a service worker (`sw.js`) caches the site and all lessons (about 2.1 MB).
 - **Installable** on the home screen (`manifest.webmanifest`).
 - No tracking or statistics.
 
@@ -62,7 +61,7 @@ After changing files, raise `VERSION` in `sw.js`, so browsers that work offline 
 
 ## Lesson data
 
-`data/` is generated from the Android app's database and About pages:
+`data/` is generated from the Android app's database, its About page and the Ukrainian translations:
 
 ```sh
 git clone https://github.com/white-collar/mobile-grammar
@@ -70,25 +69,25 @@ python3 tools/build_data.py mobile-grammar
 ```
 
 The script removes leftovers of the old help-file converter, scripts and links (the app disabled links),
-turns fixed sizes into relative ones and removes fixed table widths, so lessons fit phone screens.
+turns fixed sizes into relative ones and removes fixed table widths, so lessons fit phone screens. It also
+decodes HTML codes in titles and fixes the wrong title of unit 106 in the app's database.
 The English About text is kept in `tools/about_en.html`, because the app's English About page is empty.
-The script also decodes HTML codes in titles and fixes the wrong title of unit 106 in the app's database.
 
 ### Ukrainian translation
 
-The lessons' Russian text is split by formatting into pieces (text between tags). Each piece is translated
-separately and kept in `tools/uk/<lesson>.json` as `{"<piece number>": "translation"}`, so markup, colours
-and English examples stay exactly as in the Russian lesson. To see a lesson's pieces with the English
-around them, and to rebuild `data/lessons-uk/`:
+The app's lessons are in Russian. Their text is split by formatting into pieces (text between tags); each
+piece is translated separately and kept in `tools/uk/<lesson>.json` as `{"<piece number>": "translation"}`.
+`build_data.py` applies the translations while it builds `data/lessons/`, so markup, colours and English
+examples stay exactly as in the app, and no Russian text is stored in this repository. It stops with an
+error if a piece has no translation.
+
+To see a lesson's numbered pieces with the English around them:
 
 ```sh
-python3 tools/translate_uk.py show 12 12   # pieces of lesson 12
-python3 tools/translate_uk.py build        # fails if a piece has no translation
+python3 tools/translate_uk.py show mobile-grammar 12 12
 ```
 
-To correct a translation, edit the piece in `tools/uk/<lesson>.json` and run `build`. If `build_data.py`
-is run again and a lesson's Russian text changes, the numbering of its pieces may change too: check
-that lesson with `show` before building.
+To correct a translation, edit the piece in `tools/uk/<lesson>.json` and run `build_data.py` again.
 
 ### Categories
 
@@ -99,9 +98,9 @@ must be in exactly one group of each category (the tests check this):
 [
   {
     "id": "level",
-    "name": { "en": "By level", "ru": "По уровню", "uk": "За рівнем" },
+    "name": { "en": "By level", "uk": "За рівнем" },
     "groups": [
-      { "id": "A1", "name": { "en": "A1 · Beginner", "ru": "A1 · Начальный", "uk": "A1 · Початковий" }, "lessons": [1, 2, 24] }
+      { "id": "A1", "name": { "en": "A1 · Beginner", "uk": "A1 · Початковий" }, "lessons": [1, 2, 24] }
     ]
   }
 ]

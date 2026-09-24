@@ -158,13 +158,27 @@ test('reminder downloads a calendar event', async ({ page }) => {
 });
 
 test.describe('languages', () => {
-  test('follows the browser language', async ({ browser }) => {
-    const context = await browser.newContext({ locale: 'ru-RU' });
-    const page = await context.newPage();
-    await page.goto('http://localhost:4173/');
-    await expect(page.locator('#title')).toHaveText('Все уроки');
-    await expect(page.locator('html')).toHaveAttribute('lang', 'ru');
-    await context.close();
+  test('follows the browser language: Ukrainian, otherwise English', async ({ browser }) => {
+    for (const [locale, title, lang] of [['uk-UA', 'Усі уроки', 'uk'], ['ru-RU', 'All lessons', 'en']]) {
+      const context = await browser.newContext({ locale });
+      const page = await context.newPage();
+      await page.goto('http://localhost:4173/');
+      await expect(page.locator('#title')).toHaveText(title);
+      await expect(page.locator('html')).toHaveAttribute('lang', lang);
+      await context.close();
+    }
+  });
+
+  test('menu offers English and Ukrainian only', async ({ page }) => {
+    await page.goto('./');
+    await expect(page.locator('#language option')).toHaveText(['English', 'Українська']);
+  });
+
+  test('a saved Russian language falls back to the browser language', async ({ page }) => {
+    await page.goto('./');
+    await page.evaluate(() => localStorage.setItem('mobile-grammar.language', 'ru'));
+    await page.reload();
+    await expect(page.locator('#title')).toHaveText('All lessons');
   });
 
   test('can be changed in the menu and is remembered', async ({ page }) => {
@@ -184,9 +198,9 @@ test('about page has the web note and no Android-only section', async ({ page })
   await expect(page.locator('.web-note')).toContainText('doesn\'t collect any statistics');
   await expect(page.locator('.about h4')).toHaveText(['Why this app?', '"Mobile Grammar" has a history', 'Feedback']);
   await page.getByRole('button', { name: 'Menu' }).click();
-  await page.getByLabel('Language').selectOption('ru');
-  await expect(page.locator('.about')).toContainText('Обратная связь');
-  await expect(page.locator('.about')).not.toContainText('Что нового');
+  await page.getByLabel('Language').selectOption('uk');
+  await expect(page.locator('.about')).toContainText('Зворотній зв');
+  await expect(page.locator('.about')).not.toContainText('Що нового');
 });
 
 test('nothing is wider than the screen', async ({ page }) => {
@@ -235,38 +249,24 @@ test('works offline after the first visit', async ({ page, context }) => {
   await expect(page.locator('#title')).toContainText('Unit 77');
 });
 
-test.describe('Ukrainian lessons', () => {
-  test('every lesson has a Ukrainian version without Russian letters', () => {
+test.describe('lessons in Ukrainian', () => {
+  test('lesson files have no Russian letters', () => {
     for (let id = 1; id <= 130; id++) {
-      const uk = readFileSync(new URL(`../data/lessons-uk/${id}.html`, import.meta.url), 'utf8');
-      expect(uk, `lesson ${id}`).not.toMatch(/[ыэёъЫЭЁЪ]/);
+      const lesson = readFileSync(new URL(`../data/lessons/${id}.html`, import.meta.url), 'utf8');
+      expect(lesson, `lesson ${id}`).not.toMatch(/[ыэёъЫЭЁЪ]/);
     }
   });
 
-  test('Ukrainian interface shows Ukrainian lessons, others Russian', async ({ page }) => {
-    await page.goto('./#/lesson/1');
-    await expect(page.locator('.lesson')).toContainText('Мы используем');
-    await expect(page.locator('.lesson')).toHaveAttribute('lang', 'ru');
-    await page.getByRole('button', { name: 'Back' }).click();
-    await page.getByRole('button', { name: 'Menu' }).click();
-    await page.getByLabel('Language').selectOption('uk');
-    await page.goto('./#/lesson/1');
-    await expect(page.locator('.lesson')).toContainText('Ми використовуємо');
-    await expect(page.locator('.lesson')).toHaveAttribute('lang', 'uk');
-    // English examples stay
-    await expect(page.locator('.lesson')).toContainText('The dog is');
-  });
-
-  test('Ukrainian lessons work offline', async ({ browser }) => {
-    const context = await browser.newContext({ locale: 'uk-UA' });
-    const page = await context.newPage();
-    await page.goto('http://localhost:4173/');
-    await expect(page.locator('#title')).toHaveText('Усі уроки');
-    await waitForOfflineLessons(page, 'data/lessons-uk');
-    await context.setOffline(true);
-    await page.goto('http://localhost:4173/#/lesson/88');
-    await expect(page.locator('.lesson')).toContainText('Розгляньте приклад');
-    await context.close();
+  test('explanations are Ukrainian with both interface languages', async ({ page }) => {
+    for (const language of ['en', 'uk']) {
+      await page.goto('./');
+      await page.evaluate(lang => localStorage.setItem('mobile-grammar.language', lang), language);
+      await page.goto('./#/lesson/1');
+      await expect(page.locator('.lesson')).toContainText('Ми використовуємо');
+      await expect(page.locator('.lesson')).toHaveAttribute('lang', 'uk');
+      // English examples stay
+      await expect(page.locator('.lesson')).toContainText('The dog is');
+    }
   });
 });
 
@@ -278,7 +278,7 @@ test.describe('categories', () => {
     for (const category of readJson('categories.json')) {
       const inGroups = category.groups.flatMap(g => g.lessons).sort((a, b) => a - b);
       expect(inGroups, category.id).toEqual(ids);
-      for (const group of category.groups) expect(Object.keys(group.name).sort()).toEqual(['en', 'ru', 'uk']);
+      for (const group of category.groups) expect(Object.keys(group.name).sort()).toEqual(['en', 'uk']);
     }
   });
 
@@ -339,13 +339,13 @@ test.describe('categories', () => {
   test('level names follow the language', async ({ page }) => {
     await page.goto('./');
     await page.getByRole('button', { name: 'Menu' }).click();
-    await page.getByLabel('Language').selectOption('ru');
+    await page.getByLabel('Language').selectOption('uk');
     await page.getByRole('button', { name: 'Меню' }).click();
-    await page.getByRole('link', { name: 'По уровню' }).click();
-    await expect(page.locator('.section-header').first()).toContainText('A1 · Начальный');
-    await expect(page.locator('.chip').last()).toHaveText('Высший');
+    await page.getByRole('link', { name: 'За рівнем' }).click();
+    await expect(page.locator('.section-header').first()).toContainText('A1 · Початковий');
+    await expect(page.locator('.chip').last()).toHaveText('Вищий');
     await page.getByRole('button', { name: 'Меню' }).click();
-    await page.getByRole('link', { name: 'По теме' }).click();
-    await expect(page.locator('.section-header').first()).toContainText('Настоящее время');
+    await page.getByRole('link', { name: 'За темою' }).click();
+    await expect(page.locator('.section-header').first()).toContainText('Теперішній час');
   });
 });

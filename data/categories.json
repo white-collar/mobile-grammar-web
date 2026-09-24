@@ -3,7 +3,6 @@
   "id": "level",
   "name": {
    "en": "By level",
-   "ru": "По уровню",
    "uk": "За рівнем"
   },
   "groups": [
@@ -11,7 +10,6 @@
     "id": "A1",
     "name": {
      "en": "A1 · Beginner",
-     "ru": "A1 · Начальный",
      "uk": "A1 · Початковий"
     },
     "lessons": [
@@ -30,7 +28,6 @@
     "id": "A2",
     "name": {
      "en": "A2 · Elementary",
-     "ru": "A2 · Элементарный",
      "uk": "A2 · Елементарний"
     },
     "lessons": [
@@ -66,7 +63,6 @@
     "id": "B1",
     "name": {
      "en": "B1 · Intermediate",
-     "ru": "B1 · Средний",
      "uk": "B1 · Середній"
     },
     "lessons": [
@@ -129,7 +125,6 @@
     "id": "B2",
     "name": {
      "en": "B2 · Upper-intermediate",
-     "ru": "B2 · Выше среднего",
      "uk": "B2 · Вищий за середній"
     },
     "lessons": [
@@ -175,7 +170,6 @@
     "id": "higher",
     "name": {
      "en": "Higher · C1–C2",
-     "ru": "Высший · C1–C2",
      "uk": "Вищий · C1–C2"
     },
     "lessons": [
@@ -193,7 +187,6 @@
   "id": "topic",
   "name": {
    "en": "By topic",
-   "ru": "По теме",
    "uk": "За темою"
   },
   "groups": [
@@ -201,7 +194,6 @@
     "id": "present",
     "name": {
      "en": "Present tenses",
-     "ru": "Настоящее время",
      "uk": "Теперішній час"
     },
     "lessons": [
@@ -216,7 +208,6 @@
     "id": "past",
     "name": {
      "en": "Past tenses",
-     "ru": "Прошедшее время",
      "uk": "Минулий час"
     },
     "lessons": [
@@ -231,7 +222,6 @@
     "id": "perfect",
     "name": {
      "en": "Present perfect",
-     "ru": "Present perfect",
      "uk": "Present perfect"
     },
     "lessons": [
@@ -250,7 +240,6 @@
     "id": "future",
     "name": {
      "en": "Future",
-     "ru": "Будущее время",
      "uk": "Майбутній час"
     },
     "lessons": [
@@ -266,7 +255,6 @@
     "id": "modals",
     "name": {
      "en": "Modal verbs",
-     "ru": "Модальные глаголы",
      "uk": "Модальні дієслова"
     },
     "lessons": [
@@ -288,7 +276,6 @@
     "id": "conditionals",
     "name": {
      "en": "If, wish, unless",
-     "ru": "If, wish, unless",
      "uk": "If, wish, unless"
     },
     "lessons": [
@@ -303,7 +290,6 @@
     "id": "passive",
     "name": {
      "en": "Passive",
-     "ru": "Страдательный залог",
      "uk": "Пасивний стан"
     },
     "lessons": [
@@ -318,7 +304,6 @@
     "id": "reported",
     "name": {
      "en": "Reported speech and questions",
-     "ru": "Косвенная речь и вопросы",
      "uk": "Непряма мова і питання"
     },
     "lessons": [
@@ -334,7 +319,6 @@
     "id": "ing",
     "name": {
      "en": "-ing and infinitive",
-     "ru": "-ing и инфинитив",
      "uk": "-ing та інфінітив"
     },
     "lessons": [
@@ -358,7 +342,6 @@
     "id": "articles",
     "name": {
      "en": "Nouns and articles",
-     "ru": "Существительные и артикли",
      "uk": "Іменники та артиклі"
     },
     "lessons": [
@@ -379,7 +362,6 @@
     "id": "pronouns",
     "name": {
      "en": "Pronouns and quantifiers",
-     "ru": "Местоимения и количество",
      "uk": "Займенники та кількість"
     },
     "lessons": [
@@ -397,7 +379,6 @@
     "id": "clauses",
     "name": {
      "en": "Relative and -ing clauses",
-     "ru": "Придаточные предложения",
      "uk": "Підрядні речення"
     },
     "lessons": [
@@ -414,7 +395,6 @@
     "id": "adjectives",
     "name": {
      "en": "Adjectives, adverbs, word order",
-     "ru": "Прилагательные, наречия, порядок слов",
      "uk": "Прикметники, прислівники, порядок слів"
     },
     "lessons": [
@@ -436,7 +416,6 @@
     "id": "comparison",
     "name": {
      "en": "Comparison",
-     "ru": "Сравнение",
      "uk": "Порівняння"
     },
     "lessons": [
@@ -450,7 +429,6 @@
     "id": "linking",
     "name": {
      "en": "Linking words",
-     "ru": "Союзы и связки",
      "uk": "Сполучники"
     },
     "lessons": [
@@ -464,7 +442,6 @@
     "id": "prepositions",
     "name": {
      "en": "Prepositions and phrasal verbs",
-     "ru": "Предлоги и фразовые глаголы",
      "uk": "Прийменники та фразові дієслова"
     },
     "lessons": [

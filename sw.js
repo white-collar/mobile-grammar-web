@@ -1,7 +1,6 @@
-// Offline support: caches the site on the first visit, and all lessons in the language the page asks for
-// (Russian or Ukrainian), so everything works offline like in the Android app.
+// Offline support: caches the site and all lessons on the first visit (the Android app worked offline too).
 // Bump VERSION when files change, so browsers replace the old cache.
-const VERSION = 'v5';
+const VERSION = 'v6';
 const CACHE = `mobile-grammar-${VERSION}`;
 
 const SHELL = [
@@ -18,7 +17,6 @@ const SHELL = [
   'data/lessons.json',
   'data/categories.json',
   'data/about/en.html',
-  'data/about/ru.html',
   'data/about/uk.html',
 ];
 
@@ -26,6 +24,8 @@ self.addEventListener('install', event => {
   event.waitUntil((async () => {
     const cache = await caches.open(CACHE);
     await cache.addAll(SHELL);
+    const lessons = await (await cache.match('data/lessons.json')).json();
+    await cache.addAll(lessons.map(lesson => `data/lessons/${lesson.id}.html`));
     await self.skipWaiting();
   })());
 });
@@ -36,24 +36,6 @@ self.addEventListener('activate', event => {
       if (key.startsWith('mobile-grammar-') && key !== CACHE) await caches.delete(key);
     }
     await self.clients.claim();
-  })());
-});
-
-const LESSON_FOLDERS = ['data/lessons', 'data/lessons-uk'];
-
-// the page sends {cacheLessons: folder} with the folder of its language
-self.addEventListener('message', event => {
-  const folder = event.data && event.data.cacheLessons;
-  if (!LESSON_FOLDERS.includes(folder)) return;
-  event.waitUntil((async () => {
-    const cache = await caches.open(CACHE);
-    const lessons = await (await cache.match('data/lessons.json')).json();
-    const missing = [];
-    for (const lesson of lessons) {
-      const url = `${folder}/${lesson.id}.html`;
-      if (!(await cache.match(url))) missing.push(url);
-    }
-    await cache.addAll(missing);
   })());
 });
 

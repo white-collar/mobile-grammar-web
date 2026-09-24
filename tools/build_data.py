@@ -13,6 +13,8 @@ import sqlite3
 import sys
 from pathlib import Path
 
+import translate_uk
+
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
 
@@ -30,8 +32,9 @@ LATIN = re.compile(r"[A-Za-z]")
 
 def fix_split_words(html):
     """Letters typed in the other alphabet: words split by formatting are glued from a Latin and a Cyrillic part
-    ("C" + "пряжение", "С" + "ontinuous", "используйт" + "e"), and "c" is sometimes the Russian preposition "с".
-    Such short pieces get the alphabet of the word they belong to."""
+    (a Latin "C" starting a Cyrillic word, a Cyrillic "C" starting "ontinuous", a Latin "e" ending a Cyrillic
+    word), and a Latin "c" is sometimes used for the Cyrillic preposition. Such short pieces get the alphabet
+    of the word they belong to, so they can be translated."""
     parts = re.split(r"(<[^>]+>)", html)
     # text between tags; spaces count, empty strings between adjacent tags don't
     texts = [i for i, part in enumerate(parts) if part and not part.startswith("<")]
@@ -58,6 +61,7 @@ def fix_split_words(html):
 
 def clean_lesson(html):
     """Keeps only lesson content: no head/meta, scripts, handlers, links or converter leftovers."""
+    html = html.replace("\r\n", "\n")
     body = re.search(r"<body[^>]*>(.*)</body>", html, re.S | re.I)
     html = body.group(1) if body else html
     html = re.sub(r"<!-- CHM2WEB -->.*?<!-- /CHM2WEB -->", "", html, flags=re.S)
@@ -100,6 +104,12 @@ def clean_about(html):
     return html.strip() + "\n"
 
 
+def source_lessons(source):
+    """(id, html) of the lessons in the Android app's database"""
+    db = sqlite3.connect(str(source / "app/src/main/assets/db11.db"))
+    return [(lesson_id, html) for lesson_id, html in db.execute("select _id, html from articles order by _id")]
+
+
 def main():
     if len(sys.argv) != 2:
         sys.exit(__doc__)
@@ -107,19 +117,25 @@ def main():
     assets = source / "app/src/main/assets"
     db = sqlite3.connect(str(assets / "db11.db"))
 
+    lessons, errors = [], []
+    for lesson_id, title in db.execute("select _id, unit_number from articles order by _id"):
+        lessons.append({"id": lesson_id, "title": TITLE_FIXES.get(lesson_id, htmlentities.unescape(title).strip())})
     (DATA / "lessons").mkdir(parents=True, exist_ok=True)
-    lessons = []
-    for lesson_id, title, html in db.execute("select _id, unit_number, html from articles order by _id"):
-        title = TITLE_FIXES.get(lesson_id, htmlentities.unescape(title).strip())
-        lessons.append({"id": lesson_id, "title": title})
-        (DATA / "lessons" / ("%d.html" % lesson_id)).write_text(clean_lesson(html), encoding="utf-8")
+    for lesson_id, html in source_lessons(source):
+        try:
+            text = translate_uk.translate(lesson_id, clean_lesson(html))
+        except ValueError as error:
+            errors.append(str(error))
+            continue
+        (DATA / "lessons" / ("%d.html" % lesson_id)).write_text(text, encoding="utf-8")
+    if errors:
+        sys.exit("\n".join(errors))
 
     (DATA / "lessons.json").write_text(json.dumps(lessons, ensure_ascii=False, indent=1) + "\n", encoding="utf-8")
 
     (DATA / "about").mkdir(exist_ok=True)
-    for lang, name in (("ru", "about_ru.html"), ("uk", "about_ua.html")):
-        html = (assets / "about" / name).read_text(encoding="utf-8")
-        (DATA / "about" / ("%s.html" % lang)).write_text(clean_about(html), encoding="utf-8")
+    html = (assets / "about" / "about_ua.html").read_text(encoding="utf-8")
+    (DATA / "about" / "uk.html").write_text(clean_about(html), encoding="utf-8")
     # about_en.html of the app is empty, English text is kept in this repo
     html = (ROOT / "tools" / "about_en.html").read_text(encoding="utf-8")
     (DATA / "about" / "en.html").write_text(clean_about(html), encoding="utf-8")

@@ -1,4 +1,4 @@
-// Texts from res/values*/strings.xml of the Android app; strings marked "web" are new for this site.
+// Texts from res/values*/strings.xml of the Android app (English and Ukrainian); strings marked "web" are new for this site.
 const STRINGS = {
   en: {
     appName: 'Mobile Grammar',
@@ -47,54 +47,6 @@ const STRINGS = {
     storageError: 'Couldn\'t save: this browser doesn\'t let the site store data.',
     webNote: 'This is the web version of the Mobile Grammar app for Android. After the first visit it also works offline. ' +
       'Your groups are stored only in this browser on this device. The site doesn\'t collect any statistics.',
-  },
-  ru: {
-    appName: 'Мобильная грамматика',
-    allLessons: 'Все уроки',
-    categories: 'Категории',
-    goTo: 'Перейти к',
-    yourGroups: 'Ваши подборки',
-    about: 'О программе',
-    searchLessons: 'Какой урок найти ?',
-    nothingFound: 'Похоже, что таких уроков нет. Попробуйте ввести что-нибудь другое.',
-    noGroups: 'Пока что тут нет ни одной подборки. Но вы можете создать новую, кликнув по кнопке на Панели инструментов.',
-    groupNotFound: 'Похоже, что такой подборки нет.',
-    createGroup: 'Создать свою подборку уроков',
-    newGroup: 'Новая подборка',
-    editGroup: 'Редактировать подборку',
-    removeGroup: 'Удалить подборку',
-    removeAllGroups: 'Удалить все подборки',
-    removingGroup: 'Удаление подборки',
-    removingGroups: 'Удаление подборок уроков',
-    confirmRemoveGroup: 'Это удалит выбранную подборку. Точно продолжать ?',
-    confirmRemoveAll: 'Это удалит созданные вами подборки уроков. Точно продолжать ?',
-    groupRemoved: 'Подборка была удалена.',
-    groupsRemoved: 'ОК, ваши подборки были удалены.',
-    ok: 'Да',
-    cancel: 'Отмена',
-    groupName: 'Введите имя этой подборки',
-    noGroupName: 'Новой подборке уроков надо дать какое-то название …',
-    tooLongName: 'Извините, это слишком длинное имя для группы. Пожалуйста, уложитесь в 50 символов.',
-    selectLessons: 'Отметьте флажками те уроки, которые надо добавить в новую подборку.',
-    saveGroup: 'Сохранить подборку',
-    updateGroup: 'Обновить подборку',
-    groupSaved: 'Подборка сохранена', // web: missing in the app
-    setupReminder: 'Установить напоминание',
-    reminderLesson: 'Есть урок для изучения в "Мобильной грамматике"',
-    reminderGroup: 'Есть подборка уроков для изучения в "Мобильной грамматике"',
-    // web
-    menu: 'Меню',
-    back: 'Назад',
-    search: 'Поиск',
-    scrollTop: 'Наверх',
-    language: 'Язык',
-    lessonsCount: n => `Уроков: ${n}`,
-    selectedCount: n => `Выбрано: ${n}`,
-    loadError: 'Не удалось загрузить. Проверьте подключение и попробуйте ещё раз.',
-    retry: 'Повторить',
-    storageError: 'Не удалось сохранить: браузер не разрешает сайту хранить данные.',
-    webNote: 'Это веб-версия приложения «Мобильная грамматика» для Android. После первого посещения она работает и без интернета. ' +
-      'Ваши подборки хранятся только в этом браузере на этом устройстве. Сайт не собирает никакой статистики.',
   },
   uk: {
     appName: 'Мобільна граматика',
