@@ -293,9 +293,26 @@ async function viewLesson(id) {
       onclick: () => downloadReminder(t('reminderLesson'), `${lesson.title}\n${location.href}`),
     }],
   });
-  const article = el('article', { class: 'lesson', lang: 'ru' });
+  const article = el('article', { class: 'lesson', lang: lessonLanguage() });
   main.replaceChildren(article);
-  await loadInto(article, `data/lessons/${lesson.id}.html`);
+  await loadInto(article, `${lessonsFolder()}/${lesson.id}.html`);
+}
+
+/** Lessons exist in Russian and Ukrainian: Ukrainian interface gets Ukrainian lessons, others Russian ones */
+function lessonLanguage() {
+  return language() === 'uk' ? 'uk' : 'ru';
+}
+
+function lessonsFolder() {
+  return lessonLanguage() === 'uk' ? 'data/lessons-uk' : 'data/lessons';
+}
+
+/** Asks the service worker to keep the lessons of the current language for offline use */
+function cacheLessonsOffline() {
+  if (!('serviceWorker' in navigator)) return;
+  navigator.serviceWorker.ready
+    .then(registration => registration.active && registration.active.postMessage({ cacheLessons: lessonsFolder() }))
+    .catch(() => {});
 }
 
 /** Loads HTML of the site's own data files into the element, with retry on failure */
@@ -544,6 +561,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(
 $('language').addEventListener('change', e => {
   setLanguage(e.target.value);
   store.saveLanguage(language());
+  cacheLessonsOffline();
   fab.setAttribute('aria-label', t('scrollTop'));
   render();
 });
@@ -571,5 +589,7 @@ async function start() {
 start();
 
 if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').then(cacheLessonsOffline).catch(() => {});
+  });
 }

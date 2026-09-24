@@ -22,6 +22,40 @@ TITLE_FIXES = {
 }
 
 
+LATIN_TO_CYRILLIC = str.maketrans("AaBCcEeHKMOoPpTXxy", "АаВСсЕеНКМОоРрТХху")
+CYRILLIC_TO_LATIN = str.maketrans("АаВСсЕеНКМОоРрТХху", "AaBCcEeHKMOoPpTXxy")
+CYRILLIC = re.compile(r"[А-Яа-яЁё]")
+LATIN = re.compile(r"[A-Za-z]")
+
+
+def fix_split_words(html):
+    """Letters typed in the other alphabet: words split by formatting are glued from a Latin and a Cyrillic part
+    ("C" + "пряжение", "С" + "ontinuous", "используйт" + "e"), and "c" is sometimes the Russian preposition "с".
+    Such short pieces get the alphabet of the word they belong to."""
+    parts = re.split(r"(<[^>]+>)", html)
+    # text between tags; spaces count, empty strings between adjacent tags don't
+    texts = [i for i, part in enumerate(parts) if part and not part.startswith("<")]
+    for position, i in enumerate(texts):
+        piece = htmlentities.unescape(parts[i])
+        word = piece.strip()
+        # pieces of 1-2 letters and spaces only, so they can be replaced as plain text
+        if not word or len(word) > 2:
+            continue
+        # text right before and after this piece, spaces between tags included
+        before = "".join(htmlentities.unescape(parts[j]) for j in texts[max(0, position - 3):position])
+        after = "".join(htmlentities.unescape(parts[j]) for j in texts[position + 1:position + 4])
+        glued = (before[-1:] if piece[:1].strip() else "") + (after[:1] if piece[-1:].strip() else "")
+        latin_lookalike = all(c in "AaBCcEeHKMOoPpTXxy" for c in word)
+        cyrillic_lookalike = all(c in "АаВСсЕеНКМОоРрТХху" for c in word)
+        if latin_lookalike and CYRILLIC.search(glued):
+            parts[i] = piece.replace(word, word.translate(LATIN_TO_CYRILLIC))
+        elif cyrillic_lookalike and LATIN.search(glued) and not CYRILLIC.search(glued):
+            parts[i] = piece.replace(word, word.translate(CYRILLIC_TO_LATIN))
+        elif word in ("c", "C") and CYRILLIC.search(after.strip()[:1]):
+            parts[i] = piece.replace(word, word.translate(LATIN_TO_CYRILLIC))
+    return "".join(parts)
+
+
 def clean_lesson(html):
     """Keeps only lesson content: no head/meta, scripts, handlers, links or converter leftovers."""
     body = re.search(r"<body[^>]*>(.*)</body>", html, re.S | re.I)
@@ -47,6 +81,7 @@ def clean_lesson(html):
     html = re.sub(r"margin-right:\s*[\d.]+pt;?\s*", "", html)
     html = re.sub(r"(font-size|margin-left):\s*([\d.]+)pt",
                   lambda m: "%s:%sem" % (m.group(1), round(float(m.group(2)) / 10, 2)), html)
+    html = fix_split_words(html)
     return html.strip() + "\n"
 
 

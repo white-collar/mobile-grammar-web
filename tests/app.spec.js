@@ -203,15 +203,29 @@ test('nothing is wider than the screen', async ({ page }) => {
   }
 });
 
-test('works offline after the first visit', async ({ page, context }) => {
-  await page.goto('./');
-  await expect(rows(page)).toHaveCount(130);
+/** Waits until the service worker controls the page and has cached the lessons of the given folder */
+async function waitForOfflineLessons(page, folder) {
   await page.evaluate(async () => {
     await navigator.serviceWorker.ready;
     if (!navigator.serviceWorker.controller) {
       await new Promise(resolve => navigator.serviceWorker.addEventListener('controllerchange', resolve, { once: true }));
     }
   });
+  await expect.poll(() => page.evaluate(async dir => {
+    let count = 0;
+    for (const key of await caches.keys()) {
+      for (const request of await (await caches.open(key)).keys()) {
+        if (new URL(request.url).pathname.includes(`/${dir}/`)) count++;
+      }
+    }
+    return count;
+  }, folder), { timeout: 20000 }).toBe(130);
+}
+
+test('works offline after the first visit', async ({ page, context }) => {
+  await page.goto('./');
+  await expect(rows(page)).toHaveCount(130);
+  await waitForOfflineLessons(page, 'data/lessons');
   await context.setOffline(true);
   await page.reload();
   await expect(rows(page)).toHaveCount(130);
@@ -219,6 +233,41 @@ test('works offline after the first visit', async ({ page, context }) => {
   await page.goto('./#/lesson/77');
   await expect(page.locator('.lesson table').first()).toBeVisible();
   await expect(page.locator('#title')).toContainText('Unit 77');
+});
+
+test.describe('Ukrainian lessons', () => {
+  test('every lesson has a Ukrainian version without Russian letters', () => {
+    for (let id = 1; id <= 130; id++) {
+      const uk = readFileSync(new URL(`../data/lessons-uk/${id}.html`, import.meta.url), 'utf8');
+      expect(uk, `lesson ${id}`).not.toMatch(/[ыэёъЫЭЁЪ]/);
+    }
+  });
+
+  test('Ukrainian interface shows Ukrainian lessons, others Russian', async ({ page }) => {
+    await page.goto('./#/lesson/1');
+    await expect(page.locator('.lesson')).toContainText('Мы используем');
+    await expect(page.locator('.lesson')).toHaveAttribute('lang', 'ru');
+    await page.getByRole('button', { name: 'Back' }).click();
+    await page.getByRole('button', { name: 'Menu' }).click();
+    await page.getByLabel('Language').selectOption('uk');
+    await page.goto('./#/lesson/1');
+    await expect(page.locator('.lesson')).toContainText('Ми використовуємо');
+    await expect(page.locator('.lesson')).toHaveAttribute('lang', 'uk');
+    // English examples stay
+    await expect(page.locator('.lesson')).toContainText('The dog is');
+  });
+
+  test('Ukrainian lessons work offline', async ({ browser }) => {
+    const context = await browser.newContext({ locale: 'uk-UA' });
+    const page = await context.newPage();
+    await page.goto('http://localhost:4173/');
+    await expect(page.locator('#title')).toHaveText('Усі уроки');
+    await waitForOfflineLessons(page, 'data/lessons-uk');
+    await context.setOffline(true);
+    await page.goto('http://localhost:4173/#/lesson/88');
+    await expect(page.locator('.lesson')).toContainText('Розгляньте приклад');
+    await context.close();
+  });
 });
 
 test.describe('categories', () => {

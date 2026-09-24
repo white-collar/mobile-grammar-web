@@ -21,10 +21,13 @@ Same as the Android app:
   full hour, which the phone's calendar app imports. The Android app opened the calendar app directly.
 - **About** page, and the interface in English, Russian and Ukrainian (follows the browser language,
   can be changed in the menu)
+- **Lessons in Ukrainian** *(new on the web)*: with the Ukrainian interface the explanations are shown in
+  Ukrainian, otherwise in Russian as in the app. English examples are the same in both.
 
 Also:
 
-- **Works offline** after the first visit: a service worker (`sw.js`) caches the site and all lessons (about 2.8 MB).
+- **Works offline** after the first visit: a service worker (`sw.js`) caches the site and all lessons in the
+  current language (about 2.5 MB); switching language downloads the other set.
 - **Installable** on the home screen (`manifest.webmanifest`).
 - No tracking or statistics.
 
@@ -70,6 +73,22 @@ The script removes leftovers of the old help-file converter, scripts and links (
 turns fixed sizes into relative ones and removes fixed table widths, so lessons fit phone screens.
 The English About text is kept in `tools/about_en.html`, because the app's English About page is empty.
 The script also decodes HTML codes in titles and fixes the wrong title of unit 106 in the app's database.
+
+### Ukrainian translation
+
+The lessons' Russian text is split by formatting into pieces (text between tags). Each piece is translated
+separately and kept in `tools/uk/<lesson>.json` as `{"<piece number>": "translation"}`, so markup, colours
+and English examples stay exactly as in the Russian lesson. To see a lesson's pieces with the English
+around them, and to rebuild `data/lessons-uk/`:
+
+```sh
+python3 tools/translate_uk.py show 12 12   # pieces of lesson 12
+python3 tools/translate_uk.py build        # fails if a piece has no translation
+```
+
+To correct a translation, edit the piece in `tools/uk/<lesson>.json` and run `build`. If `build_data.py`
+is run again and a lesson's Russian text changes, the numbering of its pieces may change too: check
+that lesson with `show` before building.
 
 ### Categories
 
